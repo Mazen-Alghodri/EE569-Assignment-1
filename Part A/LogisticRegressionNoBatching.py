@@ -60,16 +60,17 @@ u_node=Linear(np.transpose([W1,W2]) ,W0,learning_rate)
 Sigmoid=sigmoid()
 BCE=bce()
 # Forward and Backward Pass
-def forward_pass(u_node,Sigmoid,BCE , x,y):
+def forward_pass(u_node,Sigmoid,BCE , x,y): # Manual forward pass through 3-layer graph: Linear -> Sigmoid -> BCE
     u_node.forward(x)
-    yhloc=u_node.predy
-    Sigmoid.forward(yhloc)
+    ylinear=u_node.predy
+    Sigmoid.forward(ylinear)
     yh=Sigmoid.sigforward
     BCE.forward(yh,y)
-def backward_pass(u_node,Sigmoid,BCE):
+def backward_pass(u_node,Sigmoid,BCE):# Backward pass: BCE -> Sigmoid -> Linear (chain rule)
     sigback=BCE.backward()
     linearback=Sigmoid.backward(sigback)
     u_node.backward(linearback)
+# Training loop - one sample at a time (no batching)
 for i in range(epochs):
     total_loss=0
     for j in range(len(X_train)):
@@ -86,7 +87,7 @@ for i in range(len(X_test)):
     x=X_test[i]
     y=y_test[i]
     forward_pass(u_node,Sigmoid,BCE,x,y)
-    if Sigmoid.sigforward>0.5:
+    if Sigmoid.sigforward>0.5:# Binary classification threshold at 0.5
         correct_predictions+=1
 accuracy = correct_predictions / X_test.shape[0]
 print(f"Accuracy: {accuracy * 100:.2f}%")
