@@ -57,17 +57,17 @@ batch_size=1
 Sigmoid=sigmoid()
 BCE=bce()
 # Forward and Backward Pass
-def forward_pass(u_node,Sigmoid,BCE , x,y):
+def forward_pass(u_node,Sigmoid,BCE , x,y):# Manual forward pass through 3-layer graph: Linear -> Sigmoid -> BCE
     u_node.forward(x)
-    yhloc=u_node.predy
-    Sigmoid.forward(yhloc)
+    ylocal=u_node.predy
+    Sigmoid.forward(ylocal)
     yh=Sigmoid.sigforward
     BCE.forward(yh,y)
-def backward_pass(u_node,Sigmoid,BCE):
+def backward_pass(u_node,Sigmoid,BCE):# Backward pass: BCE -> Sigmoid -> Linear (chain rule)
     sigback=BCE.backward()
     linearback=Sigmoid.backward(sigback)
     u_node.backward(linearback)
-for i in range(epochs):
+for i in range(epochs):# Training loop Handles Batching now
     total_loss=0
     for j in range(0,len(X_train),batch_size):
         x=X_train[j:j+batch_size]
@@ -78,6 +78,7 @@ for i in range(epochs):
         total_loss+=BCE.loss
     print(f"Epoch {i+1}, Loss: {total_loss / len(X_train)}")
 
+#Evaluation with batch
 correct_predictions = 0
 for i in range(0,len(X_test),batch_size):
     x=X_test[i:i+batch_size]
@@ -86,14 +87,14 @@ for i in range(0,len(X_test),batch_size):
     forward_pass(u_node,Sigmoid,BCE,x,y)
     for element in Sigmoid.sigforward:
         for j, number in enumerate(element):
-            if number>0.5 and y[j]==1 :
+            if number>0.5 and y[j]==1 :# Binary classification - compare each prediction with true label
                 correct_predictions+=1
             elif number<=0.5 and y[j]==0:
                 correct_predictions+=1
 accuracy = correct_predictions / X_test.shape[0]
 print(f"Accuracy: {accuracy * 100:.2f}%")
 
-
+#Testing The Effect of batch size on trainig loss
 batch_sizes = [1, 2, 4, 8, 16, 32, len(X_train)]
 loss_history = {}
 for batch_size in batch_sizes:
@@ -117,6 +118,7 @@ for batch_size in batch_sizes:
         losses.append(avg_loss)
         print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}")
     loss_history[batch_size] = losses
+#Plotting the various training loss
 plt.figure(figsize=(8,6))
 for bs, losses in loss_history.items():
     plt.plot(losses, label=f'Batch size {bs}')
